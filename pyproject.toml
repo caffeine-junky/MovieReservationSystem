@@ -10,5 +10,6 @@ dependencies = [
     "loguru>=0.7.3",
     "passlib[bcrypt]>=1.7.4",
     "pydantic-settings>=2.10.1",
+    "python-jose>=3.5.0",
     "sqlmodel>=0.0.24",
 ]
