@@ -17,7 +17,7 @@ class Database:
             return
         try:
             cls._engine = create_async_engine(db_url)
-            cls._async_session_factory = async_sessionmaker(cls._engine, expire_on_commit=False, echo=True)
+            cls._async_session_factory = async_sessionmaker(cls._engine, expire_on_commit=False)
             logger.success("Connected to the database")
         except Exception as e:
             logger.critical(f"Failed to connect to the database: {e}")

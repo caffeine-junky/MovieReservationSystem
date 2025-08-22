@@ -4,6 +4,7 @@ from typing import AsyncGenerator
 
 from app.core import settings
 from app.database import Database
+from app.routes import router
 
 
 @asynccontextmanager
@@ -21,6 +22,7 @@ app: FastAPI = FastAPI(
     description="A system that allows users to reserve movie tickets.",
     lifespan=lifespan
 )
+app.include_router(router)
 
 
 @app.get("/")
