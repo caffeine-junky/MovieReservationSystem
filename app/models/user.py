@@ -11,9 +11,14 @@ class User(SQLModel, table=True):
     email: EmailStr = Field(index=True, unique=True, nullable=False)
     hashed_password: str = Field(nullable=False)
     role: UserRole = Field(default=UserRole.USER, nullable=False)
+    is_active: bool = Field(default=True, nullable=False)
 
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    def touch(self) -> None:
+        """"""
+        self.updated_at = datetime.now(timezone.utc)
 
 
 class UserCreate(BaseModel):
@@ -51,5 +56,19 @@ class UserResponse(BaseModel):
     username: str
     email: EmailStr
     role: UserRole
+    is_active: bool
     created_at: datetime
     updated_at: datetime
+
+
+class AdminUserUpdate(BaseModel):
+    role: UserRole | None = PField(default=None)
+    is_active: bool | None = PField(default=None)
+
+    class Config:
+        json_schema_extra: dict[str, Any] = {
+            "example": {
+                "role": UserRole.ADMIN,
+                "is_active": False,
+            }
+        }
