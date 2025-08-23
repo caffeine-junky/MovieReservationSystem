@@ -1,5 +1,6 @@
 from .auth import UserRole, Token, TokenData, LoginForm
-from .user import User, UserCreate, UserUpdate, UserResponse
+from .user import UserCreate, UserUpdate, UserResponse
+from .database import User
 
 __all__ = [
     "UserRole", "Token", "TokenData", "LoginForm", # Auth
