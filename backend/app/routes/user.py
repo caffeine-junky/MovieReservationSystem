@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Query, Depends
-from app.models import UserCreate, UserUpdate, UserResponse, UserRole
+from fastapi import APIRouter, Query
+from app.models import UserCreate, UserUpdate, UserResponse
 from app.services import UserServiceDep
-from app.core import require_role
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -24,7 +23,7 @@ async def get_one_user(
     return await service.get_one_user(user_id)
 
 
-@router.get("/", response_model=list[UserResponse], status_code=200, dependencies=[Depends(require_role(UserRole.ADMIN))])
+@router.get("/", response_model=list[UserResponse], status_code=200)
 async def get_users(
     service: UserServiceDep,
     active_only: bool = True,
@@ -45,7 +44,7 @@ async def update_user(
     return await service.update_user(user_id, payload)
 
 
-@router.delete("/{user_id}", response_model=None, status_code=204, dependencies=[Depends(require_role(UserRole.ADMIN))])
+@router.delete("/{user_id}", response_model=None, status_code=204)
 async def delete_user(
     user_id: int,
     service: UserServiceDep

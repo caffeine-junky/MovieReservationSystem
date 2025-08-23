@@ -81,7 +81,10 @@ class UserService:
         updated = False
         
         for key, value in payload.model_dump(exclude_unset=True, exclude_defaults=True, exclude_none=True).items():
-            setattr(user, key, value)
+            if key == "password":
+                setattr(user, "hashed_password", SecurityUtils.hash_password(value))
+            else:
+                setattr(user, key, value)
             updated = True
         
         if updated:

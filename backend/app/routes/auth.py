@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
-from fastapi.security import OAuth2PasswordBearer
-from app.models import Token, LoginForm, UserResponse
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from app.models import Token, UserResponse
 from app.services import AuthServiceDep
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -11,8 +11,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 @router.post("/login", response_model=Token, status_code=201)
 async def login(
-    form: LoginForm,
-    service: AuthServiceDep
+    service: AuthServiceDep,
+    form: OAuth2PasswordRequestForm = Depends(),
 ) -> Token:
     """Authenticate a user and return an access token."""
     return await service.login_for_access_token(form.username, form.password)
