@@ -1,4 +1,4 @@
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Column, DateTime
 from pydantic import BaseModel, Field as PField, EmailStr
 from datetime import datetime, timezone
 from typing import Any
@@ -13,8 +13,14 @@ class User(SQLModel, table=True):
     role: UserRole = Field(default=UserRole.USER, nullable=False)
     is_active: bool = Field(default=True, nullable=False)
 
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(
+        sa_column=Column(DateTime(timezone=True)),
+        default_factory=lambda: datetime.now(timezone.utc)
+        )
+    updated_at: datetime = Field(
+        sa_column=Column(DateTime(timezone=True)),
+        default_factory=lambda: datetime.now(timezone.utc)
+        )
 
     def touch(self) -> None:
         """"""

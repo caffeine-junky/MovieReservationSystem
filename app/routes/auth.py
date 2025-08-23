@@ -6,7 +6,7 @@ from app.services import AuthServiceDep
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 # OAuth2PasswordBearer tells FastAPI to look for the "Authorization: Bearer <token>" header
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
 @router.post("/login", response_model=Token, status_code=201)
