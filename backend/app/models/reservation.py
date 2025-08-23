@@ -6,3 +6,4 @@ class ReservationStatus(StrEnum):
     CANCELLED = "cancelled"
     COMPLETED = "completed"
     EXPIRED = "expired"
+
