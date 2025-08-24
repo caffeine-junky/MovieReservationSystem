@@ -80,7 +80,7 @@ class Movie(BaseSQLModel, table=True):
     poster_url: Optional[str] = Field(default=None, max_length=500)
     is_active: bool = Field(default=True, index=True)  # For hiding movies
     
-    genre_names: Optional[str] = Field(default=None, max_length=200)
+    # genre_names: Optional[str] = Field(default=None, max_length=200)
 
     # Relationships
     genres: List["Genre"] = Relationship(

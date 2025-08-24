@@ -6,7 +6,7 @@ from app.models import User, UserCreate, UserUpdate, UserResponse
 from app.database import SessionDep
 from app.core import SecurityUtils
 from app.utils.exceptions import (
-    UserNotFoundException,
+    NotFoundException,
     UserExistsException,
     InvalidCredentialsExeception
 )
@@ -55,7 +55,7 @@ class UserService:
         """Get one user by their unique id."""
         user: User | None = await self._session.get(User, user_id)
         if not user:
-            raise UserNotFoundException()
+            raise NotFoundException("User not found")
         return self.user_to_response(user)
     
     async def get_all_users(
@@ -77,7 +77,7 @@ class UserService:
         """Update an existing user."""
         user: User | None = await self._session.get(User, user_id)
         if not user:
-            raise UserNotFoundException()
+            raise NotFoundException("User not found")
         updated = False
         
         for key, value in payload.model_dump(exclude_unset=True, exclude_defaults=True, exclude_none=True).items():
@@ -99,8 +99,9 @@ class UserService:
         """"""
         user: User | None = await self._session.get(User, user_id)
         if not user:
-            raise UserNotFoundException()
+            raise NotFoundException("User not found")
         user.is_active = False
+        user.soft_delete()
         await self._session.commit()
 
     async def authenticate(self, username: str, password: str) -> User:

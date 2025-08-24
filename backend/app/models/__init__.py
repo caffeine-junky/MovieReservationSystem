@@ -5,13 +5,15 @@ from .database import (
     User, Movie, Genre, MovieGenre, Theatre,
     Auditorium, Screening, Seat, Reservation, ReservationSeat
 )
+from .genre import GenreCreate, GenreUpdate, GenreResponse
+from .movie import MovieCreate, MovieUpdate, MovieResponse
 
 __all__ = [
     "BaseSQLModel",
     "UserRole", "Token", "TokenData", "LoginForm", # Auth
     "User", "UserCreate", "UserUpdate", "UserResponse", # User
-    "Movie", # Movie
-    "Genre", # Genre
+    "Movie", "MovieCreate", "MovieUpdate", "MovieResponse", # Movie
+    "Genre", "GenreCreate", "GenreUpdate", "GenreResponse", # Genre
     "MovieGenre", # "Links"
     "Theatre", # "Theatre"
     "Auditorium", # "Auditorium"
