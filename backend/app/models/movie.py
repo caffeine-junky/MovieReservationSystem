@@ -8,6 +8,7 @@ class MovieCreate(BaseModel):
     description: str = Field(max_length=2000)
     duration_minutes: int = Field(gt=0)
     poster_url: str | None = Field(default=None, max_length=500)
+    genre_ids: list[int] = Field(min_length=1)
 
     class Config:
         json_schema_extra: dict[str, Any] = {
@@ -22,7 +23,8 @@ class MovieCreate(BaseModel):
                 and ends with Stark publicly revealing his identity as Iron Man. 
                 """,
                 "duration_minutes": 126,
-                "poster_url": "https://media.themoviedb.org/t/p/w440_and_h660_face/78lPtwv72eTNqFW9COBYI0dWDJa.jpg"
+                "poster_url": "https://media.themoviedb.org/t/p/w440_and_h660_face/78lPtwv72eTNqFW9COBYI0dWDJa.jpg",
+                "genre_ids": [1, 3, 5] # List of ids for genres in the db
             }
         }
 
@@ -32,6 +34,7 @@ class MovieUpdate(BaseModel):
     description: str | None = Field(default=None, max_length=2000)
     duration_minutes: int | None = Field(default=None, gt=0)
     poster_url: str | None = Field(default=None, max_length=500)
+    genre_ids: list[int] | None = Field(default=None, min_length=1)
 
     class Config:
         json_schema_extra: dict[str, Any] = {
@@ -46,7 +49,8 @@ class MovieUpdate(BaseModel):
                 and ends with Stark publicly revealing his identity as Iron Man. 
                 """,
                 "duration_minutes": 126,
-                "poster_url": "https://media.themoviedb.org/t/p/w440_and_h660_face/78lPtwv72eTNqFW9COBYI0dWDJa.jpg"
+                "poster_url": "https://media.themoviedb.org/t/p/w440_and_h660_face/78lPtwv72eTNqFW9COBYI0dWDJa.jpg",
+                "genre_ids": [1, 3, 5]
             }
         }
 

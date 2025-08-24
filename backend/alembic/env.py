@@ -1,19 +1,23 @@
 import sys
 import os
 from logging.config import fileConfig
-from sqlalchemy import pool
-from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import AsyncEngine
-
+from sqlalchemy import engine_from_config, pool
 from alembic import context
 
+# ----------------------------
+# Setup paths and imports
+# ----------------------------
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app.models import BaseSQLModel
 from app.core import settings
 
+# ----------------------------
+# Alembic Config
+# ----------------------------
 config = context.config
-fileConfig(config.config_file_name) if config.config_file_name is not None else None
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
 
 target_metadata = BaseSQLModel.metadata
 DATABASE_URL = settings.DATABASE_URL
@@ -32,34 +36,26 @@ def run_migrations_offline():
     with context.begin_transaction():
         context.run_migrations()
 
-
 # ----------------------------
-# Online migrations (with async DB connection)
+# Online migrations (sync DB connection with psycopg2)
 # ----------------------------
-async def run_migrations_online():
-    from sqlalchemy.ext.asyncio import create_async_engine
-
-    connectable = create_async_engine(
-        DATABASE_URL,
+def run_migrations_online():
+    connectable = engine_from_config(
+        {"sqlalchemy.url": DATABASE_URL},
+        prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
 
-    async with connectable.connect() as connection:
-        await connection.run_sync(do_run_migrations)
+    with connectable.connect() as connection:
+        context.configure(connection=connection, target_metadata=target_metadata)
 
-    await connectable.dispose()
+        with context.begin_transaction():
+            context.run_migrations()
 
-
-def do_run_migrations(connection: Connection):
-    context.configure(connection=connection, target_metadata=target_metadata)
-
-    with context.begin_transaction():
-        context.run_migrations()
-
-
+# ----------------------------
+# Entrypoint
+# ----------------------------
 if context.is_offline_mode():
     run_migrations_offline()
 else:
-    import asyncio
-
-    asyncio.run(run_migrations_online())
+    run_migrations_online()

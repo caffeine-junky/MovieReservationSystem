@@ -12,14 +12,14 @@ from app.routes import router
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """"""
     Database.connect(settings.DATABASE_URL)
-    await Database.initialize()
+    Database.initialize()
     yield
-    await Database.disconnect()
+    Database.disconnect()
 
 
 app: FastAPI = FastAPI(
     title="Movie Reservation System API",
-    version="0.1.0",
+    version="0.3.0",
     description="A system that allows users to reserve movie tickets.",
     lifespan=lifespan
 )
@@ -42,4 +42,4 @@ async def root():
 @app.get("/health")
 async def health():
     """"""
-    return {"serverRunning": True, "databaseConnected": await Database.ping()}
+    return {"serverRunning": True, "databaseConnected": Database.ping()}

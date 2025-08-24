@@ -1,7 +1,6 @@
 from fastapi import Depends
 from typing import Annotated
-from sqlmodel import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import Session, select
 from app.models import User, UserCreate, UserUpdate, UserResponse
 from app.database import SessionDep
 from app.core import SecurityUtils
@@ -14,7 +13,7 @@ from app.utils.exceptions import (
 
 class UserService:
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: Session) -> None:
         self._session = session
     
     def user_to_response(self, user: User) -> UserResponse:
@@ -24,15 +23,13 @@ class UserService:
     async def check_user_exists(self, username: str, email: str) -> None:
         """Checks if a user exists."""
         statement = select(User).where(User.username == username)
-        result = await self._session.execute(statement)
-        user: User | None = result.scalar_one_or_none()
+        user = self._session.exec(statement).first()
 
         if user:
             raise UserExistsException("username")
         
         statement = select(User).where(User.email == email)
-        result = await self._session.execute(statement)
-        user: User | None = result.scalar_one_or_none()
+        user = self._session.exec(statement).first()
 
         if user:
             raise UserExistsException("email")
@@ -46,14 +43,14 @@ class UserService:
             **payload.model_dump(exclude={"password"})
         )
         self._session.add(user)
-        await self._session.commit()
-        await self._session.refresh(user)
+        self._session.commit()
+        self._session.refresh(user)
 
         return self.user_to_response(user)
     
     async def get_one_user(self, user_id: int) -> UserResponse:
         """Get one user by their unique id."""
-        user: User | None = await self._session.get(User, user_id)
+        user: User | None = self._session.get(User, user_id)
         if not user:
             raise NotFoundException("User not found")
         return self.user_to_response(user)
@@ -70,12 +67,12 @@ class UserService:
             statement = statement.where(User.is_active == True)
         statement = statement.offset(offset).limit(limit)
 
-        users = (await self._session.execute(statement)).scalars().all()
+        users = self._session.exec(statement).all()
         return [self.user_to_response(user) for user in users]
     
     async def update_user(self, user_id: int, payload: UserUpdate) -> UserResponse:
         """Update an existing user."""
-        user: User | None = await self._session.get(User, user_id)
+        user: User | None = self._session.get(User, user_id)
         if not user:
             raise NotFoundException("User not found")
         updated = False
@@ -90,24 +87,23 @@ class UserService:
         if updated:
             user.touch()
         
-            await self._session.commit()
-            await self._session.refresh(user)
+            self._session.commit()
+            self._session.refresh(user)
 
         return self.user_to_response(user)
 
     async def delete_user(self, user_id: int) -> None:
         """"""
-        user: User | None = await self._session.get(User, user_id)
+        user: User | None = self._session.get(User, user_id)
         if not user:
             raise NotFoundException("User not found")
-        user.is_active = False
         user.soft_delete()
-        await self._session.commit()
+        self._session.commit()
 
     async def authenticate(self, username: str, password: str) -> User:
         """"""
         statement = select(User).where(User.username == username)
-        user: User | None = (await self._session.execute(statement)).scalar_one_or_none()
+        user: User | None = self._session.exec(statement).first()
         if (not user) or (not SecurityUtils.verify_password(password, user.hashed_password)):
             raise InvalidCredentialsExeception("Invalid credentials")
         return user

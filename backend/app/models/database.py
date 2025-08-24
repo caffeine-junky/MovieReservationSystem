@@ -38,6 +38,8 @@ class BaseSQLModel(SQLModel):
     
     def soft_delete(self) -> None:
         """Mark record as deleted"""
+        if hasattr(self, "is_active"):
+            setattr(self, "is_active", False)
         self.deleted_at = datetime.now(timezone.utc)
         self.touch()
 

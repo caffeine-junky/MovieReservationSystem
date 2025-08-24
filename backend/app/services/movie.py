@@ -1,40 +1,79 @@
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import Session, select
 from typing import Annotated
 from app.database import SessionDep
-from app.models import Movie, MovieCreate, MovieUpdate, MovieResponse
-from app.utils.exceptions import NotImplementedException
+from app.models import Movie, MovieCreate, MovieUpdate, MovieResponse, Genre
+from app.utils.exceptions import NotFoundException
 
 
-# TODO: Implement this class
 class MovieService:
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: Session) -> None:
         self._session = session
     
     def movie_to_response(self, movie: Movie) -> MovieResponse:
         """"""
-        return MovieResponse(**movie.model_dump()) # ? should probably re-implement this
+        return MovieResponse(
+            **movie.model_dump(),
+            genre_names=[g.name for g in movie.genres]
+            )
     
     async def create_movie(self, payload: MovieCreate) -> MovieResponse:
         """Create a new movie."""
-        raise NotImplementedException("Create movie has not been implemented yet.")
+        statement = select(Genre).where(Genre.id.in_(payload.genre_ids)) # type: ignore
+        genres = self._session.exec(statement).all()
+        
+        movie = Movie(**payload.model_dump(exclude={"genre_ids"}), genres=list(genres))
+        self._session.add(movie)
+        self._session.commit()
+        self._session.refresh(movie)
+        
+        return self.movie_to_response(movie)
 
     async def get_one_movie(self, movie_id: int) -> MovieResponse:
         """Get one movie by its ID."""
-        raise NotImplementedException("Get one movie has not been implemented yet.")
+        movie: Movie | None = self._session.get(Movie, movie_id)
+        if not movie:
+            raise NotFoundException("Movie not found")
+        return self.movie_to_response(movie)
 
     async def get_all_movies(self, offset: int = 0, limit: int = 100) -> list[MovieResponse]:
         """Get all movies in the database."""
-        raise NotImplementedException("Get all movies has not been implemented yet.")
+        statement = select(Movie).offset(offset).limit(limit)
+        movies = self._session.exec(statement).all()
+        return [self.movie_to_response(movie) for movie in movies]
 
-    async def update_movie(self, movie_id: int, payload: MovieUpdate) -> MovieResponse:
+    def update_movie(self, movie_id: int, payload: MovieUpdate) -> MovieResponse:
         """Update an existing movie."""
-        raise NotImplementedException("Update movie has not been implemented yet.")
+        movie: Movie | None = self._session.get(Movie, movie_id)
+        if not movie:
+            raise NotFoundException("Movie not found")
+
+        data = payload.model_dump(exclude_unset=True, exclude_defaults=True, exclude_none=True)
+
+        # Handle genres
+        if "genre_ids" in data:
+            statement = select(Genre).where(Genre.id.in_(data["genre_ids"])) # type: ignore
+            genres = self._session.exec(statement).all()
+            movie.genres = list(genres)
+            del data["genre_ids"]
+
+        for key, value in data.items():
+            setattr(movie, key, value)
+
+        # Touch + persist
+        movie.touch()
+        self._session.commit()
+        self._session.refresh(movie)
+
+        return self.movie_to_response(movie)
 
     async def delete_movie(self, movie_id: int) -> None:
         """Soft delete a movie."""
-        raise NotImplementedException("Delete movie has not been implemented yet.")
+        movie: Movie | None = self._session.get(Movie, movie_id)
+        if not movie:
+            raise NotFoundException("Movie not found")
+        movie.soft_delete()
 
 
 def get_movie_service(session: SessionDep) -> MovieService:
