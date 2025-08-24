@@ -43,7 +43,7 @@ class MovieService:
         movies = self._session.exec(statement).all()
         return [self.movie_to_response(movie) for movie in movies]
 
-    def update_movie(self, movie_id: int, payload: MovieUpdate) -> MovieResponse:
+    async def update_movie(self, movie_id: int, payload: MovieUpdate) -> MovieResponse:
         """Update an existing movie."""
         movie: Movie | None = self._session.get(Movie, movie_id)
         if not movie:
@@ -74,6 +74,7 @@ class MovieService:
         if not movie:
             raise NotFoundException("Movie not found")
         movie.soft_delete()
+        self._session.commit()
 
 
 def get_movie_service(session: SessionDep) -> MovieService:

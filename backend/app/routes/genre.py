@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from app.models import GenreCreate, GenreUpdate, GenreResponse
 from app.services import GenreServiceDep
 
-router = APIRouter(prefix="/genre", tags=["Genre"])
+router = APIRouter(prefix="/genres", tags=["Genres"])
 
 
 @router.post("/", response_model=GenreResponse, status_code=200)

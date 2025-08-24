@@ -7,6 +7,7 @@ from .database import (
 )
 from .genre import GenreCreate, GenreUpdate, GenreResponse
 from .movie import MovieCreate, MovieUpdate, MovieResponse
+from .theatre import TheatreCreate, TheatreUpdate, TheatreResponse
 
 __all__ = [
     "BaseSQLModel",
@@ -15,7 +16,7 @@ __all__ = [
     "Movie", "MovieCreate", "MovieUpdate", "MovieResponse", # Movie
     "Genre", "GenreCreate", "GenreUpdate", "GenreResponse", # Genre
     "MovieGenre", # "Links"
-    "Theatre", # "Theatre"
+    "Theatre", "TheatreCreate", "TheatreUpdate", "TheatreResponse", # "Theatre"
     "Auditorium", # "Auditorium"
     "Screening", # "Screening"
     "Seat", # "Seat"
