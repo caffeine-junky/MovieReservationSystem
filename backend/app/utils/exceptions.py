@@ -39,3 +39,11 @@ class UnauthorizedException(HTTPException):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to access this resource"
         )
+
+
+class NotImplementedException(HTTPException):
+    def __init__(self, message: str) -> None:
+        super().__init__(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail=message
+        )
